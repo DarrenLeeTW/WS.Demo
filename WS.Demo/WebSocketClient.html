@@ -1,0 +1,52 @@
+<html>
+<head>
+<title></title>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+</head>
+<body>
+    <div id="app">
+        <input type="button" value="連線" v-on:click="_fnConnect">
+        <input type="button" value="關閉" v-on:click="_fnClose"><br />
+        Status : {{ status }}<br />
+        Revice count : {{ reciveCount }}<br />
+        Revice Msg : <br />
+        {{ message }}
+    </div>
+
+    <script>
+        var websocket;
+    var app = new Vue({
+        el: '#app',
+        data: {
+            message: '',
+            reciveCount: 0,
+            status: 'Disconnected',
+            WS_Uri:'ws://localhost:55688/Broadcast/'
+        }, methods: {
+            _fnConnect: function () {
+                websocket = new WebSocket(this.WS_Uri);
+                websocket.binaryType = "arraybuffer";
+                websocket.onopen = function (evt) {
+                    app._data.status = 'Connected';
+                };
+                websocket.onclose = function (evt) {
+                    app._data.status = 'Disconnected';
+                };
+                websocket.onmessage = function (evt) {
+                    app._data.reciveCount += 1;
+                    app._data.message = new TextDecoder("utf-8").decode(evt.data);;
+                };
+                websocket.onerror = function (evt) {
+                    app._data.status = evt.data;
+                };
+            },
+            _fnClose: function () {
+                websocket.close(); 
+            }
+        }
+
+    })
+    </script>
+</body>
+</html>
